@@ -1,4 +1,5 @@
 global start
+extern long_mode_start
 
 section .text
 bits 32
@@ -11,6 +12,11 @@ start:
 
     call set_up_page_tables
     call enable_paging
+
+    lgdt [gdt64.pointer]                ; load 64-bit GDT (Global Descriptor Table)
+    jmp gdt64.code:long_mode_start      ; far jump to reload `cs` (code selector)
+
+    ; no code here is executed after far jump | 32-bit instructions are considered invalid ;
 
     mov dword [0xb8000], 0x2f4b2f4f     ; print 'OK' to screen
     hlt                                 ; halt the cpu
@@ -148,6 +154,16 @@ error:
     mov dword [0xb8008], 0x4f204f20     ; 20 - ' '
     mov byte  [0xb800a], al             ; al - overrides last space with given error code
     hlt                                 ; halt the cpu
+
+
+section .rodata
+gdt64:
+    dq 0                                ; zero entry
+.code: equ $ - gdt64                    ; calculate offset and store it in gdt64.code
+    dq (1<<43)|(1<<44)|(1<<47)|(1<<53)  ; executable|code segment|present|64-bit
+.pointer:
+    dw $ - gdt64 - 1
+    dq gdt64
 
 
 ; reserve bytes for stack
