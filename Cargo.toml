@@ -1,0 +1,10 @@
+[package]
+name = "ruos"
+version = "0.0.1"
+authors = ["Andrey Golubev <andpgolubev@gmail.com>"]
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+rlibc = "1.0"

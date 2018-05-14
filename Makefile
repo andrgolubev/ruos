@@ -1,6 +1,8 @@
 arch ?= x86_64
 kernel := build/kernel-$(arch).bin
 iso := build/ruos-$(arch).iso
+target ?= $(arch)-ruos
+rust_os := target/$(target)/debug/libruos.a
 
 linker_script := src/arch/$(arch)/linker.ld
 grub_cfg := src/arch/$(arch)/grub.cfg
@@ -8,7 +10,7 @@ asm_src_files := $(wildcard src/arch/$(arch)/*.asm)
 asm_obj_files := $(patsubst src/arch/$(arch)/%.asm, \
 	build/arch/$(arch)/%.o, $(asm_src_files))
 
-.PHONY: all clean run iso
+.PHONY: all clean run iso kernel
 
 all: $(kernel)
 
@@ -27,8 +29,11 @@ $(iso): $(kernel) $(grub_cfg)
 	@grub-mkrescue -o $(iso) build/isofiles 2> /dev/null
 	@rm -rf build/isofiles
 
-$(kernel): $(asm_obj_files) $(linker_script)
-	@ld -n -T $(linker_script) -o $(kernel) $(asm_obj_files)
+$(kernel): kernel $(rust_os) $(asm_obj_files) $(linker_script)
+	@ld -n --gc-sections -T $(linker_script) -o $(kernel) $(asm_obj_files) $(rust_os)
+
+kernel:
+	@RUST_TARGET_PATH=$(shell pwd) xargo build --target $(target)
 
 # compile asm files
 build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm
