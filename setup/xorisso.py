@@ -7,9 +7,6 @@ import subprocess
 import shutil
 
 
-# TODO: automate xorriso install
-
-
 def install_xorisso(work_dir, version='1.4.6'):
     """Install xorisso to /usr/ folder"""
     if os.path.isdir(work_dir):
@@ -29,6 +26,8 @@ def install_xorisso(work_dir, version='1.4.6'):
     # shutil.rmtree(work_dir)
     return version
 
+
+# TODO: automate xorriso install
 def main():
     """Main entry point"""
     work_dir = os.path.join(os.environ['HOME'], '_xorisso')
