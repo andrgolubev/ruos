@@ -5,6 +5,7 @@ section .text
 bits 32
 start:
     mov esp, stack_top
+    mov edi, ebx                        ; Move Multiboot info pointer to `edi`
 
     call check_multiboot                ; check that kernel was really loaded with multiboot compliant bootloader
     call check_cpuid                    ; check that cpuid instruction is supported
@@ -176,5 +177,5 @@ p3_table:
 p2_table:
     resb 4096
 stack_bottom:
-    resb 64
+    resb 4096 * 4
 stack_top:
